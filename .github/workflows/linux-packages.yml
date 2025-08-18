@@ -1,0 +1,210 @@
+name: Linux Package Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-deb:
+    name: Build DEB Package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro: [ubuntu:20.04, ubuntu:22.04, debian:bullseye, debian:bookworm]
+    container:
+      image: ${{ matrix.distro }}
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y git cmake build-essential pkg-config dpkg-dev debhelper lintian
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build DEB package
+        run: |
+          # Create build directory
+          mkdir -p build
+          cd build
+          
+          # Configure and build
+          cmake ..
+          make -j$(nproc)
+          
+          # Create DEB package structure
+          cd ..
+          mkdir -p package/DEBIAN
+          mkdir -p package/usr/bin
+          mkdir -p package/usr/share/doc/cli-file-explorer
+          
+          # Copy binary
+          cp build/cli_file_explorer package/usr/bin/
+          
+          # Copy documentation
+          cp README.md LICENSE package/usr/share/doc/cli-file-explorer/
+          
+          # Create control file
+          VERSION=$(git describe --tags --always | sed 's/^v//')
+          cat > package/DEBIAN/control << EOF
+Package: cli-file-explorer
+Version: $VERSION
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: libc6 (>= 2.31), libstdc++6 (>= 9)
+Maintainer: MengAiDev <mengaidev@example.com>
+Description: A cross-platform command-line file browser similar to Windows File Explorer
+  This application provides an interactive command-line interface for browsing
+  files and directories, with features similar to Windows File Explorer.
+EOF
+          
+          # Create postinst script
+          cat > package/DEBIAN/postinst << 'EOF'
+#!/bin/bash
+echo "CLI File Explorer has been installed successfully!"
+echo "Run 'cli_file_explorer' to start the application."
+EOF
+          chmod +x package/DEBIAN/postinst
+          
+          # Create prerm script
+          cat > package/DEBIAN/prerm << 'EOF'
+#!/bin/bash
+echo "Removing CLI File Explorer..."
+EOF
+          chmod +x package/DEBIAN/prerm
+          
+          # Build package
+          dpkg-deb --build package
+          
+          # Rename package with distro info
+          DISTRO_NAME=$(echo "${{ matrix.distro }}" | sed 's/:/-/g')
+          mv package.deb cli-file-explorer_${VERSION}_${DISTRO_NAME}_amd64.deb
+
+      - name: Validate DEB package
+        run: |
+          lintian cli-file-explorer_*.deb
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-package-${{ matrix.distro }}
+          path: cli-file-explorer_*.deb
+
+  build-rpm:
+    name: Build RPM Package
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y git cmake gcc-c++ make rpm-build rpmdevtools rpmlint
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create RPM spec file
+        run: |
+          VERSION=$(git describe --tags --always | sed 's/^v//')
+          cat > cli-file-explorer.spec << EOF
+Name:           cli-file-explorer
+Version:        $VERSION
+Release:        1%{?dist}
+Summary:        A cross-platform command-line file browser similar to Windows File Explorer
+
+License:        MIT
+URL:            https://github.com/MengAiDev/cli-file-explorer
+Source0:        %{name}-%{version}.tar.gz
+
+BuildRequires:  cmake gcc-c++ make
+Requires:       glibc >= 2.31, libstdc++ >= 9
+
+%description
+This application provides an interactive command-line interface for browsing
+files and directories, with features similar to Windows File Explorer.
+
+%prep
+%autosetup
+
+%build
+%cmake
+%make_build
+
+%install
+%make_install
+
+mkdir -p %{buildroot}/%{_datadir}/doc/%{name}
+cp README.md LICENSE %{buildroot}/%{_datadir}/doc/%{name}/
+
+%files
+%{_bindir}/cli_file_explorer
+%{_datadir}/doc/%{name}/*
+
+%changelog
+* $(date +"%a %b %d %Y") MengAiDev <mengaidev@example.com> - $VERSION-1
+- Initial RPM package release
+EOF
+
+      - name: Build RPM package
+        run: |
+          # Create source archive
+          git archive --format=tar.gz --prefix=cli-file-explorer-$VERSION/ -o cli-file-explorer-$VERSION.tar.gz HEAD
+          
+          # Build RPM
+          rpmbuild -ba cli-file-explorer.spec
+          
+          # Copy RPM to workspace
+          cp /root/rpmbuild/RPMS/x86_64/cli-file-explorer-*.rpm .
+
+      - name: Validate RPM package
+        run: |
+          rpmlint cli-file-explorer-*.rpm
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rpm-package
+          path: cli-file-explorer-*.rpm
+
+  release:
+    name: Create Release
+    needs: [build-deb, build-rpm]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        run: |
+          # Upload DEB packages
+          for deb_dir in deb-package-*/; do
+            if [ -d "$deb_dir" ]; then
+              for deb_file in "$deb_dir"*.deb; do
+                if [ -f "$deb_file" ]; then
+                  gh release upload ${{ github.ref_name }} "$deb_file" --clobber
+                fi
+              done
+            fi
+          done
+          
+          # Upload RPM package
+          for rpm_file in rpm-package/*.rpm; do
+            if [ -f "$rpm_file" ]; then
+              gh release upload ${{ github.ref_name }} "$rpm_file" --clobber
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
