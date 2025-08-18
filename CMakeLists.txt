@@ -16,6 +16,7 @@ endif()
 # Add source files
 set(SOURCES
     src/main.cpp
+    src/FileSystem.cpp
 )
 
 # Add executable
@@ -26,3 +27,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 # Install targets
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+# Enable testing
+enable_testing()
+
+# Create test executable
+add_executable(FileSystemTest tests/FileSystemTest.cpp src/FileSystem.cpp)
+target_include_directories(FileSystemTest PRIVATE include)
+
+# Add test
+add_test(NAME FileSystemTest COMMAND FileSystemTest)
