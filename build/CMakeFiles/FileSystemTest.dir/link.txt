@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/FileSystemTest.dir/tests/FileSystemTest.cpp.o CMakeFiles/FileSystemTest.dir/src/FileSystem.cpp.o -o FileSystemTest 

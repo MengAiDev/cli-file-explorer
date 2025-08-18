@@ -1,0 +1,11 @@
+build/
+cmake-build-*/
+*.cmake
+CMakeCache.txt
+CMakeFiles/
+Testing/
+Makefile
+*.o
+*.exe
+*.bin
+*.out
