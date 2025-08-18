@@ -17,6 +17,10 @@ endif()
 set(SOURCES
     src/main.cpp
     src/FileSystem.cpp
+    src/cli/CommandLineInterface.cpp
+    src/fileops/FileOperations.cpp
+    src/search/Search.cpp
+    src/sorting/Sorting.cpp
 )
 
 # Add executable
@@ -24,6 +28,11 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+# Link libraries
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} shell32 shlwapi)
+endif()
 
 # Install targets
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

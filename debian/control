@@ -1,0 +1,12 @@
+Source: /home/admin/workspace/cli-file-explorer/debian/control
+
+Package: cli-file-explorer
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: libc6 (>= 2.31), libstdc++6 (>= 9.3.0)
+Maintainer: MengAiDev <mengaidev@example.com>
+Description: Cross-platform CLI File Explorer
+ A terminal-based file browser with Windows File Explorer-like interface.
+ Supports file operations, search functionality, and multiple sorting options.

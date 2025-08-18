@@ -1,0 +1,21 @@
+#!/bin/sh
+# prerm script for cli-file-explorer
+
+set -e
+
+case "$1" in
+    remove|deconfigure)
+        # Add any pre-removal actions here
+        echo "Removing cli-file-explorer..."
+        ;;
+
+    failed-upgrade)
+        ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

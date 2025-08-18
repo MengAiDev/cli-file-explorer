@@ -1,0 +1,9 @@
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/cli_file_explorer.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/FileSystemTest.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/test.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/edit_cache.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/rebuild_cache.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/list_install_components.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/install.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/install/local.dir
+/home/admin/workspace/cli-file-explorer/build/CMakeFiles/install/strip.dir

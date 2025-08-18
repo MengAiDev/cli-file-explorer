@@ -1,0 +1,35 @@
+Start testing: Aug 18 20:46 CST
+----------------------------------------------------------
+1/1 Testing: FileSystemTest
+1/1 Test: FileSystemTest
+Command: "/home/admin/workspace/cli-file-explorer/build/FileSystemTest"
+Directory: /home/admin/workspace/cli-file-explorer/build
+"FileSystemTest" start time: Aug 18 20:46 CST
+Output:
+----------------------------------------------------------
+Running FileSystem tests...
+Testing listDirectory...
+Found 8 items in parent directory
+Files found:
+  CMakeLists.txt
+  README.md
+  build
+  src
+  tests
+  .git
+  docs
+  include
+testListDirectory passed
+Testing changeDirectory...
+testChangeDirectory passed
+Testing getParentDirectory...
+FileSystemTest: /home/admin/workspace/cli-file-explorer/tests/FileSystemTest.cpp:77: void testGetParentDirectory(): Assertion `FileSystem::getParentDirectory("/") == "/"' failed.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Failed.
+"FileSystemTest" end time: Aug 18 20:46 CST
+"FileSystemTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 18 20:46 CST

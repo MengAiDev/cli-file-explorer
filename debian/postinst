@@ -1,0 +1,22 @@
+#!/bin/sh
+# postinst script for cli-file-explorer
+
+set -e
+
+case "$1" in
+    configure)
+        # Add any post-installation configuration here
+        echo "cli-file-explorer installed successfully!"
+        echo "You can now use the 'cli-file-explorer' command to start the application."
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
