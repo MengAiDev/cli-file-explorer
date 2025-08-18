@@ -1,9 +1,8 @@
-#include <iostream>
+#include "cli/CommandLineInterface.h"
 
 int main() {
-    std::cout << "CLI File Explorer" << std::endl;
-    std::cout << "=================" << std::endl;
-    std::cout << "Welcome to the cross-platform CLI file browser!" << std::endl;
+    CommandLineInterface cli;
+    cli.start();
     
     return 0;
 }
