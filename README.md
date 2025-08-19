@@ -38,6 +38,31 @@ cmake ..
 cmake --build .
 ```
 
+### Building Distribution Packages
+
+This project includes GitHub Actions workflows for building Linux distribution packages.
+The workflow automatically builds both Debian (.deb) and Arch Linux (.pkg.tar.zst) packages.
+
+To build packages manually:
+
+1. For Debian/Ubuntu:
+   ```bash
+   # Install dependencies
+   sudo apt-get install dpkg-dev debhelper
+   
+   # Build package
+   dpkg-buildpackage -us -uc -b
+   ```
+
+2. For Arch Linux:
+   ```bash
+   # Install dependencies
+   sudo pacman -S binutils
+   
+   # Build package
+   makepkg -f
+   ```
+
 ### Running the Application
 
 ```bash
