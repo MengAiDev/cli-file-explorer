@@ -9,3 +9,4 @@ Makefile
 *.exe
 *.bin
 *.out
+src/cli/CommandLineInterface_interactive.cpp.bak

@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 
 CommandLineInterface::CommandLineInterface() {
     currentPath = fileSystem.getAbsolutePath(".");
@@ -80,23 +81,42 @@ void CommandLineInterface::listDirectory() {
         return a.getName() < b.getName();
     });
     
+    // Display header
+    std::cout << std::left << std::setw(30) << "Name" 
+              << std::setw(12) << "Size" 
+              << std::setw(20) << "Modified" 
+              << std::setw(12) << "Permissions" 
+              << std::setw(10) << "Type" << "\n";
+    std::cout << std::string(90, '-') << "\n";
+    
     for (const auto& file : files) {
         std::string type;
         switch (file.getType()) {
             case FileInfo::FileType::DIRECTORY:
-                type = "[DIR] ";
+                type = "[DIR]";
                 break;
             case FileInfo::FileType::FILE:
-                type = "[FILE] ";
+                type = "[FILE]";
                 break;
             case FileInfo::FileType::SYMLINK:
-                type = "[LINK] ";
+                type = "[LINK]";
                 break;
             default:
-                type = "[UNK] ";
+                type = "[UNK]";
                 break;
         }
-        std::cout << type << file.getName() << "\n";
+        
+        std::string name = file.getName();
+        // Truncate long names
+        if (name.length() > 29) {
+            name = name.substr(0, 26) + "...";
+        }
+        
+        std::cout << std::left << std::setw(30) << name
+                  << std::setw(12) << (file.getType() == FileInfo::FileType::DIRECTORY ? "<DIR>" : FileOperations::formatFileSize(file.getSize()))
+                  << std::setw(20) << FileOperations::formatTime(file.getModifiedTime())
+                  << std::setw(12) << FileOperations::formatPermissions(file.getPermissions())
+                  << std::setw(10) << type << "\n";
     }
 }
 
@@ -149,6 +169,12 @@ void CommandLineInterface::showHelp() {
     std::cout << "  help        - Show this help message\n";
     std::cout << "  i           - Start interactive mode\n";
     std::cout << "  exit        - Exit the program\n";
+    std::cout << "\nIn interactive mode:\n";
+    std::cout << "  ↑/↓         - Navigate lines\n";
+    std::cout << "  PgUp/PgDn   - Page up/down\n";
+    std::cout << "  Enter       - Open directories or view file content\n";
+    std::cout << "  Ctrl+E      - Edit file with vim\n";
+    std::cout << "  q           - Quit interactive mode\n";
 }
 
 void CommandLineInterface::startInteractive() {

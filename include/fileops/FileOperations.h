@@ -1,21 +1,17 @@
-#ifndef FILEOPERATIONS_H
-#define FILEOPERATIONS_H
+#ifndef FILEOPS_FILEOPERATIONS_H
+#define FILEOPS_FILEOPERATIONS_H
 
 #include <string>
-#include <vector>
-#include <filesystem>
+#include <chrono>
 
 class FileOperations {
 public:
-    static bool copyFile(const std::string& source, const std::string& destination);
-    static bool moveFile(const std::string& source, const std::string& destination);
-    static bool deleteFile(const std::string& path);
-    static bool createDirectory(const std::string& path);
-    static bool createFile(const std::string& path);
-    static std::vector<std::string> searchFiles(const std::string& directory, const std::string& pattern);
-
-private:
-    static bool confirmOperation(const std::string& operation, const std::string& path);
+    static bool createFile(const std::string& filePath);
+    static bool deleteFile(const std::string& filePath);
+    // Add helper functions for formatting
+    static std::string formatFileSize(size_t size);
+    static std::string formatTime(const std::chrono::system_clock::time_point& tp);
+    static std::string formatPermissions(uint32_t permissions);
 };
 
-#endif // FILEOPERATIONS_H
+#endif // FILEOPS_FILEOPERATIONS_H

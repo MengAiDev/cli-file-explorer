@@ -1,5 +1,6 @@
 #ifdef USE_NCURSES
 #include "../../include/cli/CommandLineInterface.h"
+#include "../../include/fileops/FileOperations.h"
 #include <ncurses.h>
 #include <vector>
 #include <algorithm>
@@ -47,7 +48,7 @@ void CommandLineInterface::interactiveListDirectory() {
         }
         
         // Calculate display bounds
-        maxRows = LINES - 3;
+        maxRows = LINES - 5; // Adjust for header and footer lines
         if (selected >= offset + maxRows) {
             offset = selected - maxRows + 1;
         } else if (selected < offset) {
@@ -57,7 +58,8 @@ void CommandLineInterface::interactiveListDirectory() {
         // Display header
         printw("CLI File Explorer - Interactive Mode\n");
         printw("Current path: %s\n", currentPath.c_str());
-        printw("----------------------------------------\n");
+        printw("%-30s %-12s %-20s %-12s %-10s\n", "Name", "Size", "Modified", "Permissions", "Type");
+        printw("%s\n", std::string(90, '-').c_str());
         
         // Display files
         int end = std::min(offset + maxRows, (int)files.size());
@@ -66,31 +68,50 @@ void CommandLineInterface::interactiveListDirectory() {
             std::string type;
             switch (file.getType()) {
                 case FileInfo::FileType::DIRECTORY:
-                    type = "[DIR] ";
+                    type = "[DIR]";
                     break;
                 case FileInfo::FileType::FILE:
-                    type = "[FILE] ";
+                    type = "[FILE]";
                     break;
                 case FileInfo::FileType::SYMLINK:
-                    type = "[LINK] ";
+                    type = "[LINK]";
                     break;
                 default:
-                    type = "[UNK] ";
+                    type = "[UNK]";
                     break;
             }
             
+            std::string name = file.getName();
+            // Truncate long names
+            if (name.length() > 29) {
+                name = name.substr(0, 26) + "...";
+            }
+            
+            std::string sizeStr = (file.getType() == FileInfo::FileType::DIRECTORY) ? 
+                                  "<DIR>" : FileOperations::formatFileSize(file.getSize());
+            
             if (i == selected) {
                 attron(A_REVERSE);
-                printw("> %s%s\n", type.c_str(), file.getName().c_str());
+                printw("> %-30s %-12s %-20s %-12s %-10s\n", 
+                       name.c_str(), 
+                       sizeStr.c_str(),
+                       FileOperations::formatTime(file.getModifiedTime()).c_str(),
+                       FileOperations::formatPermissions(file.getPermissions()).c_str(),
+                       type.c_str());
                 attroff(A_REVERSE);
             } else {
-                printw("  %s%s\n", type.c_str(), file.getName().c_str());
+                printw("  %-30s %-12s %-20s %-12s %-10s\n", 
+                       name.c_str(), 
+                       sizeStr.c_str(),
+                       FileOperations::formatTime(file.getModifiedTime()).c_str(),
+                       FileOperations::formatPermissions(file.getPermissions()).c_str(),
+                       type.c_str());
             }
         }
         
         // Display footer
-        printw("----------------------------------------\n");
-        printw("↑/↓: Navigate lines | PgUp/PgDn: Page up/down | Enter: Open | q: Quit\n");
+        printw("%s\n", std::string(90, '-').c_str());
+        printw("↑/↓: Navigate lines | PgUp/PgDn: Page up/down | Enter: Open | Ctrl+E: Edit with vim | n: New file | q: Quit\n");
         
         // Refresh screen
         refresh();
@@ -161,6 +182,78 @@ void CommandLineInterface::interactiveListDirectory() {
                 }
                 break;
                 
+            case 5: // Ctrl+E
+                {
+                    const auto& selectedFile = files[selected];
+                    if (selectedFile.getType() == FileInfo::FileType::FILE) {
+                        // Edit file with vim
+                        std::string filePath = currentPath;
+#ifdef _WIN32
+                        if (filePath.back() != '\\' && filePath.back() != '/') {
+                            filePath += "\\";
+                        }
+#else
+                        if (filePath.back() != '/') {
+                            filePath += "/";
+                        }
+#endif
+                        filePath += selectedFile.getName();
+                        editFileWithVim(filePath);
+                        
+                        // After editing file, refresh the directory listing
+                        clear();
+                        refresh();
+                    }
+                }
+                break;
+                
+            case 'n':
+                {
+                    // Create new file
+                    // End ncurses mode to get user input
+                    endwin();
+                    
+                    // Get filename from user
+                    std::cout << "Enter filename: ";
+                    std::string filename;
+                    std::getline(std::cin, filename);
+                    
+                    // Create full path
+                    std::string filePath = currentPath;
+#ifdef _WIN32
+                    if (filePath.back() != '\\' && filePath.back() != '/') {
+                        filePath += "\\";
+                    }
+#else
+                    if (filePath.back() != '/') {
+                        filePath += "/";
+                    }
+#endif
+                    filePath += filename;
+                    
+                    // Create the file
+                    if (FileOperations::createFile(filePath)) {
+                        std::cout << "File created successfully: " << filePath << std::endl;
+                    } else {
+                        std::cout << "Failed to create file: " << filePath << std::endl;
+                    }
+                    
+                    std::cout << "Press Enter to continue...";
+                    std::cin.get();
+                    
+                    // Reinitialize ncurses
+                    initscr();
+                    cbreak();
+                    noecho();
+                    keypad(stdscr, TRUE);
+                    curs_set(0); // Hide cursor
+                    
+                    // Refresh the directory listing
+                    clear();
+                    refresh();
+                }
+                break;
+
             case 'q':
             case 'Q':
                 // Exit interactive mode
@@ -332,6 +425,33 @@ void CommandLineInterface::displayFileContent(const std::string& filePath) {
                 delwin(fileWin);
                 return;
         }
+    }
+}
+
+void CommandLineInterface::editFileWithVim(const std::string& filePath) {
+    // End ncurses mode before launching vim
+    endwin();
+    
+    // Construct the vim command
+    std::string command = "vim \"" + filePath + "\"";
+    
+    // Execute vim
+    int result = system(command.c_str());
+    
+    // Reinitialize ncurses after vim exits
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0); // Hide cursor
+    
+    // Check if vim command was successful
+    if (result != 0) {
+        // Display error message
+        printw("Failed to open file with vim. Exit code: %d\n", result);
+        printw("Press any key to continue...");
+        refresh();
+        getch();
     }
 }
 #endif // USE_NCURSES

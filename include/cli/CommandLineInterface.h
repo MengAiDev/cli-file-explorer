@@ -27,6 +27,7 @@ private:
 #ifdef USE_NCURSES
     void interactiveListDirectory();
     void displayFileContent(const std::string& filePath);
+    void editFileWithVim(const std::string& filePath);
 #endif
     
     FileSystem fileSystem;
