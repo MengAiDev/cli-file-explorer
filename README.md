@@ -1,10 +1,9 @@
 # CLI File Explorer
 
-A cross-platform command-line file browser similar to Windows File Explorer, implemented in C++.
+A command-line file browser similar to Windows File Explorer, implemented in C++.
 
 ## Features
 
-- Cross-platform support (Windows, Linux, macOS)
 - Interactive command-line interface
 - Directory navigation with `cd` command
 - File and directory listing with `ls` command
