@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
+#include <filesystem>
 
 CommandLineInterface::CommandLineInterface() {
     currentPath = fileSystem.getAbsolutePath(".");
@@ -67,6 +68,12 @@ void CommandLineInterface::processCommand(const std::string& command) {
         showHelp();
     } else if (tokens[0] == "touch" && tokens.size() > 1) {
         createFile(tokens[1]);
+    } else if (tokens[0] == "rm" && tokens.size() > 1) {
+        deleteFile(tokens[1]);
+    } else if (tokens[0] == "rmdir" && tokens.size() > 1) {
+        deleteDirectory(tokens[1]);
+    } else if (tokens[0] == "mv" && tokens.size() > 2) {
+        renameFile(tokens[1], tokens[2]);
     } else {
         std::cout << "Unknown command: " << command << "\n";
         std::cout << "Type 'help' for available commands.\n";
@@ -162,19 +169,22 @@ void CommandLineInterface::executeShellCommand(const std::string& command) {
 
 void CommandLineInterface::showHelp() {
     std::cout << "Available commands:\n";
-    std::cout << "  ls          - List files in current directory\n";
-    std::cout << "  cd <path>   - Change directory\n";
-    std::cout << "  touch <filename> - Create a new file\n";
-    std::cout << "  !<command>  - Execute shell command\n";
-    std::cout << "  help        - Show this help message\n";
-    std::cout << "  i           - Start interactive mode\n";
-    std::cout << "  exit        - Exit the program\n";
+    std::cout << "  ls                - List files in current directory\n";
+    std::cout << "  cd <path>         - Change directory\n";
+    std::cout << "  touch <filename>  - Create a new file\n";
+    std::cout << "  rm <file>         - Delete a file\n";
+    std::cout << "  rmdir <directory> - Delete an empty directory\n";
+    std::cout << "  mv <old> <new>    - Rename/move file or directory\n";
+    std::cout << "  !<command>        - Execute shell command\n";
+    std::cout << "  help              - Show this help message\n";
+    std::cout << "  i                 - Start interactive mode\n";
+    std::cout << "  exit              - Exit the program\n";
     std::cout << "\nIn interactive mode:\n";
-    std::cout << "  ↑/↓         - Navigate lines\n";
-    std::cout << "  PgUp/PgDn   - Page up/down\n";
-    std::cout << "  Enter       - Open directories or view file content\n";
-    std::cout << "  Ctrl+E      - Edit file with vim\n";
-    std::cout << "  q           - Quit interactive mode\n";
+    std::cout << "  ↑/↓               - Navigate lines\n";
+    std::cout << "  PgUp/PgDn         - Page up/down\n";
+    std::cout << "  Enter             - Open directories or view file content\n";
+    std::cout << "  Ctrl+E            - Edit file with vim\n";
+    std::cout << "  q                 - Quit interactive mode\n";
 }
 
 void CommandLineInterface::startInteractive() {

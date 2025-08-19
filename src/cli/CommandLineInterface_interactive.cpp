@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <dirent.h>
+#include <cstring>
 
 void CommandLineInterface::interactiveListDirectory() {
     // Initialize ncurses
@@ -111,7 +113,7 @@ void CommandLineInterface::interactiveListDirectory() {
         
         // Display footer
         printw("%s\n", std::string(90, '-').c_str());
-        printw("↑/↓: Navigate lines | PgUp/PgDn: Page up/down | Enter: Open | Ctrl+E: Edit with vim | n: New file | q: Quit\n");
+        printw("↑/↓: Navigate | Enter: Open | Ctrl+E: Edit | n: New | d: Delete | r: Rename | q: Quit\n");
         
         // Refresh screen
         refresh();
@@ -236,6 +238,143 @@ void CommandLineInterface::interactiveListDirectory() {
                         std::cout << "File created successfully: " << filePath << std::endl;
                     } else {
                         std::cout << "Failed to create file: " << filePath << std::endl;
+                    }
+                    
+                    std::cout << "Press Enter to continue...";
+                    std::cin.get();
+                    
+                    // Reinitialize ncurses
+                    initscr();
+                    cbreak();
+                    noecho();
+                    keypad(stdscr, TRUE);
+                    curs_set(0); // Hide cursor
+                    
+                    // Refresh the directory listing
+                    clear();
+                    refresh();
+                }
+                break;
+                
+            case 'd':
+                {
+                    // Delete file or directory
+                    const auto& selectedFile = files[selected];
+                    std::string itemPath = currentPath;
+#ifdef _WIN32
+                    if (itemPath.back() != '\\' && itemPath.back() != '/') {
+                        itemPath += "\\";
+                    }
+#else
+                    if (itemPath.back() != '/') {
+                        itemPath += "/";
+                    }
+#endif
+                    itemPath += selectedFile.getName();
+                    
+                    // End ncurses mode to get user confirmation
+                    endwin();
+                    
+                    std::cout << "Are you sure you want to delete '" << selectedFile.getName() << "'? (y/N): ";
+                    std::string response;
+                    std::getline(std::cin, response);
+                    
+                    if (response == "y" || response == "Y") {
+                        bool success = false;
+                        if (selectedFile.getType() == FileInfo::FileType::DIRECTORY) {
+                            // Check if directory is empty
+                            DIR* dir = opendir(itemPath.c_str());
+                            if (dir) {
+                                struct dirent* entry;
+                                bool isEmpty = true;
+                                while ((entry = readdir(dir)) != nullptr) {
+                                    if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                                        isEmpty = false;
+                                        break;
+                                    }
+                                }
+                                closedir(dir);
+                                
+                                if (isEmpty) {
+                                    success = FileOperations::deleteDirectory(itemPath);
+                                } else {
+                                    std::cout << "Directory is not empty. Use shell command to delete non-empty directories.\n";
+                                }
+                            } else {
+                                std::cout << "Cannot access directory: " << selectedFile.getName() << std::endl;
+                            }
+                        } else {
+                            success = FileOperations::deleteFile(itemPath);
+                        }
+                        
+                        if (success) {
+                            std::cout << "Deleted successfully: " << selectedFile.getName() << std::endl;
+                        } else {
+                            std::cout << "Failed to delete: " << selectedFile.getName() << std::endl;
+                        }
+                    } else {
+                        std::cout << "Deletion cancelled.\n";
+                    }
+                    
+                    std::cout << "Press Enter to continue...";
+                    std::cin.get();
+                    
+                    // Reinitialize ncurses
+                    initscr();
+                    cbreak();
+                    noecho();
+                    keypad(stdscr, TRUE);
+                    curs_set(0); // Hide cursor
+                    
+                    // Refresh the directory listing
+                    clear();
+                    refresh();
+                }
+                break;
+                
+            case 'r':
+                {
+                    // Rename file or directory
+                    const auto& selectedFile = files[selected];
+                    std::string oldPath = currentPath;
+#ifdef _WIN32
+                    if (oldPath.back() != '\\' && oldPath.back() != '/') {
+                        oldPath += "\\";
+                    }
+#else
+                    if (oldPath.back() != '/') {
+                        oldPath += "/";
+                    }
+#endif
+                    oldPath += selectedFile.getName();
+                    
+                    // End ncurses mode to get user input
+                    endwin();
+                    
+                    std::cout << "Enter new name for '" << selectedFile.getName() << "': ";
+                    std::string newName;
+                    std::getline(std::cin, newName);
+                    
+                    if (!newName.empty() && newName != selectedFile.getName()) {
+                        std::string newPath = currentPath;
+#ifdef _WIN32
+                        if (newPath.back() != '\\' && newPath.back() != '/') {
+                            newPath += "\\";
+                        }
+#else
+                        if (newPath.back() != '/') {
+                            newPath += "/";
+                        }
+#endif
+                        newPath += newName;
+                        
+                        if (FileOperations::renameFile(oldPath, newPath)) {
+                            std::cout << "Renamed successfully: " << selectedFile.getName() << " -> " << newName << std::endl;
+                        } else {
+                            std::cout << "Failed to rename: " << selectedFile.getName() << " -> " << newName << std::endl;
+                        }
+                    } else {
+                        std::cout << "Rename cancelled.\n";
                     }
                     
                     std::cout << "Press Enter to continue...";

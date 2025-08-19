@@ -22,6 +22,9 @@ private:
     void listDirectory();
     void changeDirectory(const std::string& path);
     void createFile(const std::string& filename);
+    void deleteFile(const std::string& path);
+    void deleteDirectory(const std::string& path);
+    void renameFile(const std::string& oldPath, const std::string& newPath);
     void showHelp();
     
 #ifdef USE_NCURSES

@@ -40,6 +40,41 @@ bool FileOperations::deleteFile(const std::string& path) {
     return false;
 }
 
+bool FileOperations::deleteDirectory(const std::string& dirPath) {
+#ifdef _WIN32
+    if (RemoveDirectory(dirPath.c_str())) {
+        return true;
+    }
+#else
+    if (rmdir(dirPath.c_str()) == 0) {
+        return true;
+    }
+#endif
+    return false;
+}
+
+bool FileOperations::renameFile(const std::string& oldPath, const std::string& newPath) {
+#ifdef _WIN32
+    if (MoveFile(oldPath.c_str(), newPath.c_str())) {
+        return true;
+    }
+#else
+    if (rename(oldPath.c_str(), newPath.c_str()) == 0) {
+        return true;
+    }
+#endif
+    return false;
+}
+
+bool FileOperations::exists(const std::string& path) {
+#ifdef _WIN32
+    return PathFileExists(path.c_str()) != 0;
+#else
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
+#endif
+}
+
 // Format file size for human-readable display
 std::string FileOperations::formatFileSize(size_t size) {
     const char* units[] = {"B", "KB", "MB", "GB", "TB"};
