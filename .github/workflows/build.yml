@@ -62,3 +62,22 @@ jobs:
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: ctest --build-config ${{ matrix.build_type }}
+
+    - name: Package Build Artifacts
+      if: matrix.build_type == 'Release'
+      run: |
+        # Create zip package of build artifacts
+        cd ${{ steps.strings.outputs.build-output-dir }}
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          7z a -tzip ../cli-file-explorer-${{ matrix.os }}.zip .
+        else
+          zip -r ../cli-file-explorer-${{ matrix.os }}.zip .
+        fi
+      shell: bash
+
+    - name: Upload Build Artifacts
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: cli-file-explorer-${{ matrix.os }}
+        path: cli-file-explorer-${{ matrix.os }}.zip
