@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 CommandLineInterface::CommandLineInterface() {
     currentPath = fileSystem.getAbsolutePath(".");
@@ -11,7 +12,8 @@ CommandLineInterface::CommandLineInterface() {
 
 void CommandLineInterface::start() {
     std::cout << "CLI File Explorer\n";
-    std::cout << "Type 'help' for available commands or 'exit' to quit.\n\n";
+    std::cout << "Type 'help' for available commands or 'exit' to quit.\n";
+    std::cout << "Press 'i' to start interactive mode.\n\n";
     
     std::string input;
     while (true) {
@@ -20,6 +22,11 @@ void CommandLineInterface::start() {
         
         if (input == "exit") {
             break;
+        }
+        
+        if (input == "i") {
+            startInteractive();
+            continue;
         }
         
         processCommand(input);
@@ -31,6 +38,14 @@ void CommandLineInterface::showPrompt() {
 }
 
 void CommandLineInterface::processCommand(const std::string& command) {
+    // Handle shell commands that start with '!'
+    if (!command.empty() && command[0] == '!') {
+        if (command.length() > 1) {
+            executeShellCommand(command.substr(1));
+        }
+        return;
+    }
+    
     std::istringstream iss(command);
     std::vector<std::string> tokens;
     std::string token;
@@ -118,11 +133,28 @@ void CommandLineInterface::createFile(const std::string& filename) {
     }
 }
 
+void CommandLineInterface::executeShellCommand(const std::string& command) {
+    int result = system(command.c_str());
+    if (result != 0) {
+        std::cout << "Shell command failed with exit code: " << result << "\n";
+    }
+}
+
 void CommandLineInterface::showHelp() {
     std::cout << "Available commands:\n";
     std::cout << "  ls          - List files in current directory\n";
     std::cout << "  cd <path>   - Change directory\n";
     std::cout << "  touch <filename> - Create a new file\n";
+    std::cout << "  !<command>  - Execute shell command\n";
     std::cout << "  help        - Show this help message\n";
+    std::cout << "  i           - Start interactive mode\n";
     std::cout << "  exit        - Exit the program\n";
+}
+
+void CommandLineInterface::startInteractive() {
+#ifdef USE_NCURSES
+    interactiveListDirectory();
+#else
+    std::cout << "Interactive mode is not available. Please compile with ncurses support.\n";
+#endif
 }

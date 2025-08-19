@@ -11,6 +11,7 @@ A cross-platform command-line file browser similar to Windows File Explorer, imp
 - File type identification (directories, files, symlinks)
 - Help system with `help` command
 - Exit functionality with `exit` command
+- Interactive file browsing mode (press 'i' to start)
 
 ## Advanced Features
 
@@ -25,6 +26,7 @@ A cross-platform command-line file browser similar to Windows File Explorer, imp
 
 - CMake 3.10 or higher
 - C++17 compatible compiler (GCC, Clang, or MSVC)
+- ncurses library (for Linux - `sudo apt-get install libncurses-dev`)
 
 ### Building from Source
 
@@ -50,7 +52,21 @@ Once the application is running, you can use the following commands:
 - `ls` - List files in the current directory
 - `cd <path>` - Change to the specified directory
 - `help` - Display help information
+- `i` - Start interactive mode (file browser with arrow keys)
 - `exit` - Exit the application
+
+### Interactive Mode
+
+In interactive mode:
+- Use up/down arrow keys to navigate through files and directories
+- Press Enter to enter a directory or view a file's content
+- Press 'q' to exit file view or interactive mode
+
+When viewing file content:
+- Line numbers are displayed in yellow (if terminal supports color)
+- Content is displayed with proper wrapping
+- Total line count is shown in the header
+- Use up/down arrow keys to scroll through the file content
 
 ## Contributing
 

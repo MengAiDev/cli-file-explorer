@@ -22,6 +22,7 @@ void testListDirectory() {
         bool foundSrc = false;
         bool foundInclude = false;
         bool foundTests = false;
+        bool foundDocs = false;
         bool foundCMakeLists = false;
         bool foundReadme = false;
         
@@ -29,6 +30,7 @@ void testListDirectory() {
             if (file.getName() == "src") foundSrc = true;
             if (file.getName() == "include") foundInclude = true;
             if (file.getName() == "tests") foundTests = true;
+            if (file.getName() == "docs") foundDocs = true;
             if (file.getName() == "CMakeLists.txt") foundCMakeLists = true;
             if (file.getName() == "README.md") foundReadme = true;
         }
@@ -36,6 +38,7 @@ void testListDirectory() {
         assert(foundSrc);
         assert(foundInclude);
         assert(foundTests);
+        assert(foundDocs);
         assert(foundCMakeLists);
         assert(foundReadme);
         
