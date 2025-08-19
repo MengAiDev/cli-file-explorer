@@ -86,6 +86,20 @@ bool FileOperations::createDirectory(const std::string& path) {
     return false;
 }
 
+bool FileOperations::createFile(const std::string& path) {
+    if (!confirmOperation("Create file", path)) {
+        return false;
+    }
+
+    // Create an empty file by opening it in output mode and immediately closing it
+    std::ofstream file(path, std::ios::out);
+    if (file.is_open()) {
+        file.close();
+        return true;
+    }
+    return false;
+}
+
 std::vector<std::string> FileOperations::searchFiles(const std::string& directory, const std::string& pattern) {
     std::vector<std::string> results;
     std::regex regexPattern(pattern);

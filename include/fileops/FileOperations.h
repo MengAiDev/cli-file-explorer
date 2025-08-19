@@ -11,6 +11,7 @@ public:
     static bool moveFile(const std::string& source, const std::string& destination);
     static bool deleteFile(const std::string& path);
     static bool createDirectory(const std::string& path);
+    static bool createFile(const std::string& path);
     static std::vector<std::string> searchFiles(const std::string& directory, const std::string& pattern);
 
 private:

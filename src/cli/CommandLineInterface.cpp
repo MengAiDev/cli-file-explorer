@@ -1,4 +1,5 @@
-#include "CommandLineInterface.h"
+#include "../../include/cli/CommandLineInterface.h"
+#include "../../include/fileops/FileOperations.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -48,6 +49,8 @@ void CommandLineInterface::processCommand(const std::string& command) {
         changeDirectory(tokens[1]);
     } else if (tokens[0] == "help") {
         showHelp();
+    } else if (tokens[0] == "touch" && tokens.size() > 1) {
+        createFile(tokens[1]);
     } else {
         std::cout << "Unknown command: " << command << "\n";
         std::cout << "Type 'help' for available commands.\n";
@@ -92,10 +95,34 @@ void CommandLineInterface::changeDirectory(const std::string& path) {
     }
 }
 
+void CommandLineInterface::createFile(const std::string& filename) {
+    std::string filePath = currentPath;
+    
+    // Add appropriate path separator
+#ifdef _WIN32
+    if (filePath.back() != '\\' && filePath.back() != '/') {
+        filePath += "\\";
+    }
+#else
+    if (filePath.back() != '/') {
+        filePath += "/";
+    }
+#endif
+    
+    filePath += filename;
+    
+    if (FileOperations::createFile(filePath)) {
+        std::cout << "File created successfully: " << filePath << "\n";
+    } else {
+        std::cout << "Failed to create file: " << filePath << "\n";
+    }
+}
+
 void CommandLineInterface::showHelp() {
     std::cout << "Available commands:\n";
     std::cout << "  ls          - List files in current directory\n";
     std::cout << "  cd <path>   - Change directory\n";
+    std::cout << "  touch <filename> - Create a new file\n";
     std::cout << "  help        - Show this help message\n";
     std::cout << "  exit        - Exit the program\n";
 }

@@ -14,6 +14,7 @@ private:
     void processCommand(const std::string& command);
     void listDirectory();
     void changeDirectory(const std::string& path);
+    void createFile(const std::string& filename);
     void showHelp();
     
     FileSystem fileSystem;
