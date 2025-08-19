@@ -20,7 +20,6 @@ jobs:
         run: |
           apt-get update
           apt-get install -y git cmake build-essential pkg-config dpkg-dev debhelper lintian
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -86,7 +85,6 @@ EOF
       - name: Validate DEB package
         run: |
           lintian cli-file-explorer_*.deb
-
       - name: Upload DEB artifact
         uses: actions/upload-artifact@v3
         with:
@@ -102,7 +100,6 @@ EOF
       - name: Install dependencies
         run: |
           dnf install -y git cmake gcc-c++ make rpm-build rpmdevtools rpmlint
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -158,11 +155,9 @@ EOF
           
           # Copy RPM to workspace
           cp /root/rpmbuild/RPMS/x86_64/cli-file-explorer-*.rpm .
-
       - name: Validate RPM package
         run: |
           rpmlint cli-file-explorer-*.rpm
-
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v3
         with:
