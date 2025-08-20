@@ -1,5 +1,6 @@
 #include "../../include/cli/CommandLineInterface.h"
 #include "../../include/fileops/FileOperations.h"
+#include "../../include/bookmark/BookMark.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -9,6 +10,8 @@
 #include <filesystem>
 
 CommandLineInterface::CommandLineInterface() {
+    // Load bookmarks from file
+    BookMark::loadBookMarks();
     currentPath = fileSystem.getAbsolutePath(".");
 }
 
@@ -23,6 +26,8 @@ void CommandLineInterface::start() {
         std::getline(std::cin, input);
         
         if (input == "exit") {
+            // Save bookmarks to file before exiting
+            BookMark::saveBookMarks();
             break;
         }
         
@@ -74,6 +79,46 @@ void CommandLineInterface::processCommand(const std::string& command) {
         deleteDirectory(tokens[1]);
     } else if (tokens[0] == "mv" && tokens.size() > 2) {
         renameFile(tokens[1], tokens[2]);
+    } else if (tokens[0] == "cp" && tokens.size() > 2) {
+        copyFile(tokens[1], tokens[2]);
+    } else if (tokens[0] == "bookmark" && tokens.size() > 1) {
+        // Handle bookmark commands
+        if (tokens[1] == "add" && tokens.size() > 2) {
+            std::string path = tokens[2];
+            // If path is relative, make it absolute
+            if (path[0] != '/') {
+                path = currentPath + "/" + path;
+            }
+            if (BookMark::addBookMark(path)) {
+                std::cout << "Bookmark added: " << path << "\n";
+            } else {
+                std::cout << "Bookmark already exists: " << path << "\n";
+            }
+        } else if (tokens[1] == "remove" && tokens.size() > 2) {
+            std::string path = tokens[2];
+            // If path is relative, make it absolute
+            if (path[0] != '/') {
+                path = currentPath + "/" + path;
+            }
+            if (BookMark::removeBookMark(path)) {
+                std::cout << "Bookmark removed: " << path << "\n";
+            } else {
+                std::cout << "Bookmark not found: " << path << "\n";
+            }
+        } else if (tokens[1] == "list") {
+            std::cout << "Bookmarks:\n";
+            for (const auto& bookmark : BookMark::bookMarks) {
+                std::cout << "  " << bookmark << "\n";
+            }
+        } else if (tokens[1] == "clear") {
+            if (BookMark::emptyBookMarks()) {
+                std::cout << "All bookmarks cleared.\n";
+            } else {
+                std::cout << "No bookmarks to clear.\n";
+            }
+        } else {
+            std::cout << "Invalid bookmark command. Use 'bookmark add <path>', 'bookmark remove <path>', 'bookmark list', or 'bookmark clear'.\n";
+        }
     } else {
         std::cout << "Unknown command: " << command << "\n";
         std::cout << "Type 'help' for available commands.\n";
@@ -175,6 +220,11 @@ void CommandLineInterface::showHelp() {
     std::cout << "  rm <file>         - Delete a file\n";
     std::cout << "  rmdir <directory> - Delete an empty directory\n";
     std::cout << "  mv <old> <new>    - Rename/move file or directory\n";
+    std::cout << "  cp <source> <dest> - Copy file or directory\n";
+    std::cout << "  bookmark add <path>    - Add a bookmark\n";
+    std::cout << "  bookmark remove <path> - Remove a bookmark\n";
+    std::cout << "  bookmark list          - List all bookmarks\n";
+    std::cout << "  bookmark clear         - Clear all bookmarks\n";
     std::cout << "  !<command>        - Execute shell command\n";
     std::cout << "  help              - Show this help message\n";
     std::cout << "  i                 - Start interactive mode\n";

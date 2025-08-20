@@ -10,6 +10,7 @@ public:
     static bool deleteFile(const std::string& filePath);
     static bool deleteDirectory(const std::string& dirPath);
     static bool renameFile(const std::string& oldPath, const std::string& newPath);
+    static bool copyFile(const std::string& sourcePath, const std::string& destinationPath);
     static bool exists(const std::string& path);
     
     // Add helper functions for formatting

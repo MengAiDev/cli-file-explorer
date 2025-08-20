@@ -11,6 +11,7 @@ A command-line file browser similar to Windows File Explorer, implemented in C++
 - Help system with `help` command
 - Exit functionality with `exit` command
 - Interactive file browsing mode (press 'i' to start)
+- Bookmark management system with persistent storage
 
 ## Advanced Features
 
@@ -18,6 +19,7 @@ A command-line file browser similar to Windows File Explorer, implemented in C++
 - File search functionality with regex pattern matching
 - File sorting by name, size, date, or type
 - Support for both file name and content search
+- Bookmark management with persistent storage in `~/.bookmarks.txt`
 
 ## Installation
 
@@ -78,6 +80,35 @@ Once the application is running, you can use the following commands:
 - `help` - Display help information
 - `i` - Start interactive mode (file browser with arrow keys)
 - `exit` - Exit the application
+- `bookmark add <path>` - Add a bookmark for the specified path
+- `bookmark remove <path>` - Remove a bookmark for the specified path
+- `bookmark list` - List all bookmarks
+- `bookmark clear` - Clear all bookmarks
+
+### Bookmark Management
+
+The CLI File Explorer includes a bookmark management system that allows you to save and manage frequently accessed paths. Bookmarks are automatically saved to `~/.bookmarks.txt` and loaded when the application starts.
+
+Bookmarks can be managed both in interactive mode and through non-interactive command-line arguments:
+
+```bash
+# Add a bookmark (interactive mode)
+bookmark add /home/user/documents
+
+# Remove a bookmark (interactive mode)
+bookmark remove /home/user/documents
+
+# List all bookmarks (interactive mode)
+bookmark list
+
+# Clear all bookmarks (interactive mode)
+bookmark clear
+
+# Non-interactive usage
+./cli_file_explorer bookmark add /home/user/documents
+./cli_file_explorer bookmark list
+./cli_file_explorer bookmark remove /home/user/documents
+```
 
 ### Interactive Mode
 

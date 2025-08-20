@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <filesystem>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -64,6 +65,16 @@ bool FileOperations::renameFile(const std::string& oldPath, const std::string& n
     }
 #endif
     return false;
+}
+
+bool FileOperations::copyFile(const std::string& sourcePath, const std::string& destinationPath) {
+    try {
+        std::filesystem::copy(sourcePath, destinationPath, std::filesystem::copy_options::overwrite_existing);
+        return true;
+    } catch (const std::filesystem::filesystem_error& ex) {
+        std::cerr << "Copy failed: " << ex.what() << std::endl;
+        return false;
+    }
 }
 
 bool FileOperations::exists(const std::string& path) {

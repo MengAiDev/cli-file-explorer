@@ -25,6 +25,7 @@ private:
     void deleteFile(const std::string& path);
     void deleteDirectory(const std::string& path);
     void renameFile(const std::string& oldPath, const std::string& newPath);
+    void copyFile(const std::string& sourcePath, const std::string& destinationPath);
     void showHelp();
     
 #ifdef USE_NCURSES

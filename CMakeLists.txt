@@ -20,9 +20,11 @@ set(SOURCES
     src/cli/CommandLineInterface.cpp
     src/cli/CommandLineInterface_interactive.cpp
     src/cli/CommandLineInterface_delete_rename.cpp
+    src/cli/CommandLineInterface_copy.cpp
     src/fileops/FileOperations.cpp
     src/search/Search.cpp
     src/sorting/Sorting.cpp
+    src/bookmark/BookMark.cpp
 )
 
 # Add executable
@@ -56,3 +58,10 @@ target_compile_definitions(FileSystemTest PRIVATE USE_NCURSES)
 
 # Add test
 add_test(NAME FileSystemTest COMMAND FileSystemTest)
+
+# Create bookmark test executable
+add_executable(BookMarkTest tests/BookMarkTest.cpp src/bookmark/BookMark.cpp)
+target_include_directories(BookMarkTest PRIVATE include)
+
+# Add bookmark test
+add_test(NAME BookMarkTest COMMAND BookMarkTest)
